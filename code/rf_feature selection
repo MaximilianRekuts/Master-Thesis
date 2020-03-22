@@ -1,0 +1,107 @@
+library(REEMtree)
+library(caret)
+library(glmertree)
+library(Boruta)
+library(ggplot2)
+library(vip)
+
+
+data_tree <-prepped_data_partial %>% 
+  select(-id)
+
+set.seed(123)
+index_1 <- createDataPartition(data_tree$job_satisfaction, p = 0.7,
+                               list = FALSE)
+
+train_1 <- data_tree[index_1, ]
+test_1 <- data_tree[-index_1, ]
+
+
+rf_impurity <- ranger(train_1$job_satisfaction ~.,
+                      data = train_1,
+                      num.trees = 2000,
+                      mtry = 32,
+                      min.node.size = 1,
+                      sample.fraction = .80,
+                      replace = FALSE,
+                      importance = "impurity",
+                      respect.unordered.factors = "order",
+                      verbose = FALSE,
+                      seed = 123
+)
+print(rf_impurity)
+p1 <- vip::vip(rf_impurity, num_features = 36)
+print(p1)
+
+rf_permutation <- ranger(train_1$job_satisfaction ~.,
+                         data = train_1,
+                         num.trees = 2000,
+                         mtry = 32,
+                         min.node.size = 1,
+                         sample.fraction = .80,
+                         replace = FALSE,
+                         importance = "permutation",
+                         respect.unordered.factors = "order",
+                         verbose = FALSE,
+                         seed = 123)
+
+print(rf_permutation)
+p2 <- vip::vip(rf_permutation, num_features = 36)
+print(p2)
+
+grid.arrange(p1, p2, nrow = 1)
+
+#feature selection for full.data
+
+library(caret)
+library(glmertree)
+library(Boruta)
+library(ggplot2)
+library(vip)
+library(xtable)
+
+data_tree_full <-prepped_data_full %>% 
+  select(-id)
+
+set.seed(123)
+index_1_full <- createDataPartition(data_tree_full$job_satisfaction, p = 0.7,
+                                    list = FALSE)
+
+train_1_full <- data_tree_full[index_1_full, ]
+test_1_full <- data_tree_full[-index_1_full, ]
+
+#feature selection random forest
+
+rf_impurity_full <- ranger(train_1_full$job_satisfaction ~.,
+                      data = train_1_full,
+                      num.trees = 2000,
+                      mtry = 32,
+                      min.node.size = 1,
+                      sample.fraction = .80,
+                      replace = FALSE,
+                      importance = "impurity",
+                      respect.unordered.factors = "order",
+                      verbose = FALSE,
+                      seed = 123)
+
+print(rf_impurity_full)
+p1_full <- vip::vip(rf_impurity_full, num_features = 36)
+print(p1_full)
+
+rf_permutation_full <- ranger(train_1_full$job_satisfaction ~.,
+                         data = train_1_full,
+                         num.trees = 2000,
+                         mtry = 32,
+                         min.node.size = 1,
+                         sample.fraction = .80,
+                         replace = FALSE,
+                         importance = "permutation",
+                         respect.unordered.factors = "order",
+                         verbose = FALSE,
+                         seed = 123)
+
+print(rf_permutation_full)
+p2_full <- vip::vip(rf_permutation_full, num_features = 36)
+print(p2_full)
+
+grid.arrange(p1, p2, nrow = 1)
