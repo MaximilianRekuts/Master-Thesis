@@ -1,7 +1,5 @@
-Introduction to Machine Learning Project
+Master Thesis - Hertie School of Governance, Berlin
 
-An analysis of the determinants of job satisfaction.
+This Master Thesis used data from National Longitudinal Surveys conducted U.S. Bureau of Labour Statistics to analyse variables that contribute or do not contribute to job satisfaction. The panel data was recorded in the United States from 1979 through to 2016. 
 
-Data: Longitudinal measures of several thousand people in the United States from 1979 through 2016.
-
-Methods: Ordinal longitudinal mixed-effects models and regularized regression.
+The methods that were used to analyse the data were 1. regularisation regression and ordinal longitudinal mixed-effects models. 
