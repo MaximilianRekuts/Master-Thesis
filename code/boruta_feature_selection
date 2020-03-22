@@ -1,0 +1,87 @@
+library(Boruta)
+
+feature_selection <- Boruta(train_1$job_satisfaction ~., data = train_1, doTrace = 2 )
+print(feature_selection)
+
+feature_selection_fix <- TentativeRoughFix(feature_selection)
+print(feature_selection_fix)
+
+#Boruta on prepped_data_partial test
+
+feature_selection_test <- Boruta(test_1$job_satisfaction~., data = test_1, doTrace = 2)
+print(feature_selection_test)
+
+feature_selection_test_fix <- TentativeRoughFix(feature_selection_test)
+print(feature_selection_test_fix)
+
+#confirm importance of features:
+
+getSelectedAttributes(feature_selection_fix, withTentative = FALSE)
+
+feature_selection_fix_df <- attStats(feature_selection_fix)
+View(feature_selection_fix_df)
+
+#plot feature_selections Boruta
+
+plot(feature_selection, xlab = "", xaxt = "n")
+lz<-lapply(1:ncol(feature_selection$ImpHistory),function(i)
+  feature_selection$ImpHistory[is.finite(feature_selection$ImpHistory[,i]),i])
+names(lz) <- colnames(feature_selection$ImpHistory)
+Labels <- sort(sapply(lz,median))
+axis(side = 1,las=2,labels = names(Labels),
+     at = 1:ncol(feature_selection$ImpHistory), cex.axis = 0.7)
+
+#plot feature_selection_fix
+
+plot(feature_selection_fix, xlab = "", xaxt = "n")
+lz<-lapply(1:ncol(feature_selection_fix$ImpHistory),function(i)
+  feature_selection_fix$ImpHistory[is.finite(feature_selection_fix$ImpHistory[,i]),i])
+names(lz) <- colnames(feature_selection_fix$ImpHistory)
+Labels <- sort(sapply(lz,median))
+axis(side = 1,las=2,labels = names(Labels),
+     at = 1:ncol(feature_selection_fix$ImpHistory), cex.axis = 0.7)
+     
+     
+     
+#boruta on full.data
+
+feature_selection_full <- Boruta(train_1_full$job_satisfaction ~., data = train_1_full, doTrace = 2 )
+print(feature_selection_full)
+
+feature_selection_full_fix <- TentativeRoughFix(feature_selection_full)
+print(feature_selection_full_fix)
+
+#I think the above algorithm shows less unimportant features because of overfitting
+
+feature_selection_full_test <- Boruta(test_1_full$job_satisfaction ~., data = test_1_full, doTrace = 2 )
+print(feature_selection_full_test)
+
+feature_selection_full_test_fix <- TentativeRoughFix(feature_selection_full_test)
+print(feature_selection_full_test_fix)
+
+#confirm importance of features:
+
+getSelectedAttributes(feature_selection_full_fix, withTentative = FALSE)
+
+feature_selection__full_fix_df <- attStats(feature_selection_full_fix)
+View(feature_selection_full_fix_df)
+
+#plot feature_selections Boruta
+
+plot(feature_selection_full, xlab = "", xaxt = "n")
+lz<-lapply(1:ncol(feature_selection_full$ImpHistory),function(i)
+  feature_selection_full$ImpHistory[is.finite(feature_selection_full$ImpHistory[,i]),i])
+names(lz) <- colnames(feature_selection_full$ImpHistory)
+Labels <- sort(sapply(lz,median))
+axis(side = 1,las=2,labels = names(Labels),
+     at = 1:ncol(feature_selection_full$ImpHistory), cex.axis = 0.7)
+
+#plot feature_selection_fix
+
+plot(feature_selection_full_fix, xlab = "", xaxt = "n")
+lz<-lapply(1:ncol(feature_selection_full_fix$ImpHistory),function(i)
+  feature_selection_full_fix$ImpHistory[is.finite(feature_selection_full_fix$ImpHistory[,i]),i])
+names(lz) <- colnames(feature_selection_full_fix$ImpHistory)
+Labels <- sort(sapply(lz,median))
+axis(side = 1,las=2,labels = names(Labels),
+     at = 1:ncol(feature_selection_full_fix$ImpHistory), cex.axis = 0.7)
