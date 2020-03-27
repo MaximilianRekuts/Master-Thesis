@@ -1,0 +1,33 @@
+library(tidyverse)
+library(caret)
+library(dplyr)
+
+set.seed(123)
+training.samples <- prepped_data_partial_center$job_satisfaction %>%
+  createDataPartition(p = 0.8, list = FALSE)
+train.data  <- prepped_data_partial_center[training.samples, ]
+test.data <- prepped_data_partial_center[-training.samples, ]
+
+# Build the model
+model1 <- lm(job_satisfaction ~., data = train.data)
+# Make predictions
+predictions <- model1 %>% predict(test.data)
+# Model performance
+data.frame(
+  RMSE = RMSE(predictions, test.data$job_satisfaction),
+  R2 = R2(predictions, test.data$job_satisfaction)
+)
+
+car::vif(model1)
+
+# Build a model excluding the year variable
+model2 <- lm(job_satisfaction ~. -year, data = train.data)
+# Make predictions
+predictions <- model2 %>% predict(test.data)
+# Model performance
+data.frame(
+  RMSE = RMSE(predictions, test.data$job_satisfaction),
+  R2 = R2(predictions, test.data$job_satisfaction)
+)
+
+#results show that removing the variable year does not affect very much the model's performance metric
