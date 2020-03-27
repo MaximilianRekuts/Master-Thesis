@@ -64,12 +64,5 @@ prepped_data_partial_2 <- as.vector(prepped_data_partial_2)
 nonlinearityTest(prepped_data_partial_2, verbose = TRUE)
 
 
-terasvirta = tseries::terasvirta.test(x = ts(prepped_data_partial_2), type = "Chisq")
-terasvirta
-white = tseries::white.test(ts(prepped_data_partial_2))
-white
-keenan = TSA::Keenan.test(prepped_data_partial_2)
-keenan
-
 #for the majority of tests above, the p-value is zero, meaning the null hypothesis is rejected and there is no
 #linearity or in other words there is non-linearity between the variables - so all good!
