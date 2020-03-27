@@ -1,6 +1,7 @@
 library(tidyverse)
 library(dplyr)
-data <- read.csv("thirdselection_.csv")
+library(reshape)
+data <- read.csv("data_from_NLSY.csv")
 final_dictionary <- read_csv("final_dictionary.csv")
 
 clean_data <- data %>% 
@@ -64,7 +65,7 @@ mutated_data <- data_to_mutate %>%
   ethnicity = as_factor(dplyr::case_when(
   ethnicity == 1 ~ "hispanic",
   ethnicity == 2 ~ "black",
-  ethnicity == 3 ~ "non-hispanic or black"
+  ethnicity == 3 ~ "non-hispanic non-black"
 )),
 religion = as_factor(dplyr::case_when(
   religion == 0 ~ "no_religion",
@@ -341,9 +342,38 @@ prepped_data_subset2 <- prepped_data_partial %>%
 
 prepped_data_partial_center <- cbind(prepped_data_subset, prepped_data_subset2)
 
+#rename features
+prepped_data_partial <- rename(prepped_data_partial_center, 
+                                      c(total_tenure_inweeks_with_employer_asof_interview_date = "tenure",
+                                        drug_use_marijuana_or_hashish_lifetime ="drug_use",
+                                        new_job_lined_up_before_left = "new_job",
+                                        covered_union_or_employee_contract = "union_or_contract",
+                                        status_of_number_of_jobs_ever_reported = "jobs_reported",
+                                        degree_of_control_over_direction_own_life ="control_own_life",
+                                        degree_of_influence_own_life = "influence_own_life",
+                                        job_with_state_local_or_federal_government = "job_level"))
+
+prepped_data_full <- rename(prepped_data_partial_center, 
+                               c(total_tenure_inweeks_with_employer_asof_interview_date = "tenure",
+                                 drug_use_marijuana_or_hashish_lifetime ="drug_use",
+                                 new_job_lined_up_before_left = "new_job",
+                                 covered_union_or_employee_contract = "union_or_contract",
+                                 status_of_number_of_jobs_ever_reported = "jobs_reported",
+                                 degree_of_control_over_direction_own_life ="control_own_life",
+                                 degree_of_influence_own_life = "influence_own_life",
+                                 job_with_state_local_or_federal_government = "job_level"))
+
+prepped_data_partial_center <- rename(prepped_data_partial_center, 
+                                      c(total_tenure_inweeks_with_employer_asof_interview_date = "tenure",
+                                        drug_use_marijuana_or_hashish_lifetime ="drug_use",
+                                        new_job_lined_up_before_left = "new_job",
+                                        covered_union_or_employee_contract = "union_or_contract",
+                                        status_of_number_of_jobs_ever_reported = "jobs_reported",
+                                        degree_of_control_over_direction_own_life ="control_own_life",
+                                        degree_of_influence_own_life = "influence_own_life",
+                                        job_with_state_local_or_federal_government = "job_level"))
 
 #save data
 save(prepped_data_full, file = "prepped_data_full.RData")
 save(prepped_data_partial, file = "prepped_data_partial.RData")
 save(prepped_data_partial_center, file = "prepped_data_partial_center.RData")
-
