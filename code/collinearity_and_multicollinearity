@@ -22,12 +22,15 @@ car::vif(model1)
 
 # Build a model excluding the year variable
 model2 <- lm(job_satisfaction ~. -year, data = train.data)
+model3 <- lm(job_satisfaction ~. -rotter_score, data = train.data)
 # Make predictions
 predictions <- model2 %>% predict(test.data)
+predictions <- model3 %>% predict(test.data)
 # Model performance
 data.frame(
   RMSE = RMSE(predictions, test.data$job_satisfaction),
   R2 = R2(predictions, test.data$job_satisfaction)
 )
 
-#results show that removing the variable year does not affect very much the model's performance metric
+#results show that removing the variable year & rotter_score does not affect very much the model's performance metric
+
