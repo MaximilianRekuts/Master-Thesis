@@ -163,7 +163,7 @@ interact.gbm <- Interaction$new(predictor.gbm) %>% plot() + ggtitle("GBM")
 # plot
 gridExtra::grid.arrange(interact.glm, interact.rf, interact.gbm, nrow = 1)
 
-# identify variables with largest interactions w/OverTime
+# identify variables with largest interactions
 interact.glm1 <- Interaction$new(predictor.glm, feature = "jobs_since_last_interview") %>% plot()
 interact.rf1  <- Interaction$new(predictor.rf, feature = "jobs_since_last_interview") %>% plot()
 interact.gbm1 <- Interaction$new(predictor.gbm, feature = "jobs_since_last_interview") %>% plot()
