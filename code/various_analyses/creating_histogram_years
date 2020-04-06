@@ -1,0 +1,12 @@
+library(foreign)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+returns <- ts(mutated_data$job_satisfaction, start = c(1988, 1), frequency = 12)
+
+
+rTS <- ts(prepped_data_partial_center$year)
+plot.ts(rTS)
+hist(rTS, main="years", breaks=60, freq=TRUE, border = "black", col="grey")
+par(mar = c(4, 4, 1, 1))
