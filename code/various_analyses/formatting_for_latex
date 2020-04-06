@@ -1,0 +1,121 @@
+library(knitr)
+library(rmarkdown)
+library(dplyr)
+library(tidyverse)
+library(reshape)
+library(kableExtra)
+library(xtable)
+
+
+names(mutated_data)[names(mutated_data)=="total_tenure_inweeks_with_employer_asof_interview_date"] <- "tenure"
+names(mutated_data)[names(mutated_data)=="drug_use_marijuana_or_hashish_lifetime"] <- "drug_use"
+names(mutated_data)[names(mutated_data)=="new_job_lined_up_before_left"] <- "new_job"
+names(mutated_data)[names(mutated_data)=="covered_union_or_employee_contract"] <- "union_or_contract"
+names(mutated_data)[names(mutated_data)=="status_of_number_of_jobs_ever_reported"] <- "jobs_reported"
+names(mutated_data)[names(mutated_data)=="degree_of_control_over_direction_own_life"] <- "control_own_life"
+names(mutated_data)[names(mutated_data)=="degree_of_influence_own_life"] <- "influence_own_life"
+names(mutated_data)[names(mutated_data)=="job_with_state_local_or_federal_government"] <- "job_level"
+
+mutated_data_vector <- as.vector(mutated_data)
+
+library(starg)
+
+stargazer(colSum, omit = c("jobs_since_last_interview",
+                           "year",
+                           "citizen_of_us",
+                           "gender",
+                           "ethnicity",
+                           "country_of_birth",
+                           "id"))
+
+mutated_data_table <- subset(mutated_data) %>% 
+select(-jobs_since_last_interview,
+       -year,
+       -citizen_of_us,
+       -gender,
+       -ethnicity,
+       -country_of_birth,
+       -id,
+       -job_number,
+       -jobs_reported,
+       -marital_status,
+       -age_at_interview_date,
+       -drug_use,
+       -religion)
+
+popo <- data.frame(features = c("job_satisfaction",
+                                "control_own_life",
+                                "importance_of_planning",
+                                "importance_of_luck",
+                                "influence_own_life",
+                                "rotter_score",
+                                "total_family_income_past_year",
+                                "family_poverty_previous_year",
+                                "children_household",
+                                "self_esteem_score",
+                                "weight",
+                                "ces_depression",
+                                "height_in_feet",
+                                "height_in_inches",
+                                "life_satisfaction",
+                                "hours_worked_week",
+                                "union_or_contract",
+                                "class_of_worker",
+                                "hourly_pay",
+                                "tenure",
+                                "reason_left",
+                                "hours_per_week",
+                                "new_job",
+                                "job_level",
+                                "union_or_employee_association"),
+                   missing.data = c(133652,
+                                    573257,
+                                    573250,
+                                    573259,
+                                    573306,
+                                    573373,
+                                    101003,
+                                    100985,
+                                    180723,
+                                    552456,
+                                    145862,
+                                    568953,
+                                    497484,
+                                    497737,
+                                    567916,
+                                    292063,
+                                    344010,
+                                    319018,
+                                    64481,
+                                    271980,
+                                    497129,
+                                    574212,
+                                    492948,
+                                    578743,
+                                    477919))
+
+popo <- as.data.frame(popo)
+xtable(popo)
+
+
+results_table <- data.frame(Deviance = c(219838,
+                                         221061.3,
+                                         1223.3),
+                            "Log-likelihood" = c(-109919,
+                                               -110530.7,
+                                               611.7),
+                            AIC = c(-109925,
+                                    -110530.7,
+                                    605.7),
+                            SBC = c(-109942.2,
+                                    -110754.8,
+                                    812.6),
+                            n = c(119768,
+                                  120817,
+                                  1049),
+                            d = c(2,
+                                  35,
+                                  33))
+
+results_table <- as.data.frame(results_table)
+xtable(results_table)
