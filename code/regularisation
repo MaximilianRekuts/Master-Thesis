@@ -1,0 +1,100 @@
+library(tidyverse)
+library(glmnet)
+library(data.table)
+library(ggplot2)
+library(caret)
+library(vip)
+library(reshape)
+library(dplyr)
+set.seed(123)
+
+X <- prepped_data_partial_center %>% dplyr::select(-id)
+
+
+X <- model.matrix(job_satisfaction ~ ., X)[, -1]
+
+Y <- prepped_data_partial$job_satisfaction
+
+#fit lasso regression
+lasso <- glmnet(
+  x = X,
+  y = Y,
+  alpha = 1)
+
+#apply 10-fold CV lasso regression
+lasso_cv <- cv.glmnet(
+  x = X,
+  y = Y,
+  alpha = 1)
+
+#plot results of CV
+plot(lasso_cv, main = "Lasso penalty\n\n")
+
+#minimum MSE = 0.5365813
+min(lasso_cv$cvm)  
+
+#lambda for this minimum MSE = 0.0003839942
+lasso_cv$lambda.min
+
+#largest lambda value within one SE of the MSE = 0.01093629 (This shows how much we can constrain the coefficients while still maximizing predictive accuracy)
+lasso_cv$lambda.1se
+
+#coefficientes at lambda.1se
+library(coefplot)
+extract.coef(lasso_cv, lambda = "lambda.1se")
+
+#plot with names of variables
+plot_coeff_evolution = function(regularization, type = 'Lasso')
+{
+  require(ggplot2)
+  lambda = regularization$lambda
+  coeff = as.matrix(regularization$beta)
+  rowName = rownames(coeff)
+  coeff = data.table(coeff)
+  coeff[ ,name:=rowName]
+  coeff = melt(coeff, id.vars = 'name')
+  coeff[ ,variable:=rep(lambda, each = length(unique(name)))]
+  ggplot(coeff, aes(x = variable, y = value, color = name)) +
+    geom_line() +
+    xlab('Value of lambda') +
+    ylab('Value of coefficient') +
+    scale_x_log10() + 
+    geom_vline(xintercept = lasso_cv$lambda.1se, linetype = "longdash") + 
+    geom_vline(xintercept = lasso_cv$lambda.min, linetype = "longdash") + 
+    theme(axis.text=element_text(size=12), axis.title=element_text(size=12,face="bold"))
+}
+
+plot_coeff_evolution(lasso, "Lasso")+
+  theme(legend.title = element_text(size=12, color = "black"), 
+        legend.text = element_text(size=5),
+        legend.key=element_rect("white")) + 
+  guides(colour = guide_legend(override.aes = list(size=0.8, stroke=1.5), ncol = 7)) +
+  theme(legend.position="bottom", legend.box = "horizontal") + labs(subtitle="Lasso Regularisation")
+
+#grid search across
+
+cv_glmnet <- train(
+  x = X,
+  y = Y,
+  method = "glmnet",
+  preProc = c("zv", "center", "scale"),
+  trControl = trainControl(method = "cv", number = 10),
+  tuneLength = 10
+)
+
+pred <- predict(cv_glmnet, X)
+RMSE(pred, Y)
+
+vip::vip(cv_glmnet, num_features = 100, geom = "point")
+
+cv_glmnet <- rename(cv_glmnet, 
+                                      c(total_tenure_inweeks_with_employer_asof_interview_date = "tenure",
+                                        drug_use_marijuana_or_hashish_lifetime ="drug_use",
+                                        new_job_lined_up_before_left = "new_job",
+                                        covered_union_or_employee_contract = "union_or_contract",
+                                        status_of_number_of_jobs_ever_reported = "jobs_reported",
+                                        degree_of_control_over_direction_own_life ="control_own_life",
+                                        degree_of_influence_own_life = "influence_own_life",
+                                        job_with_state_local_or_federal_government = "job_level"))
+
+
