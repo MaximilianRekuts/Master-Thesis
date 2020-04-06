@@ -13,9 +13,8 @@ df <- prepped_data_partial_center %>%
   mutate(job_satisfaction = recode(job_satisfaction, "1" = "1", "2" = "1", "3" = "0", "4" = "0") 
          %>% factor(levels = c("1", "0")))
 
-df <- sample_n(df, 10000)
 df <- df %>% 
-  select(-id, -height_in_inches)
+  select(-id)
 
 df.h2o <- as.h2o(df)
 
@@ -80,9 +79,6 @@ pred <- function(model, newdata)  {
   return(results[[3L]])
 }
 
-# example of prediction output
-pred(rf, features) %>% head()
-## [1] 0.9321871 0.9422886 0.9578263 0.9542687 0.8762458 0.9185059
 
 # create predictor object to pass to explainer functions
 predictor.glm <- Predictor$new(
@@ -101,36 +97,21 @@ predictor.rf <- Predictor$new(
   class = "classification"
 )
 
-predictor.gbm <- Predictor$new(
-  model = gbm, 
-  data = features, 
-  y = response, 
-  predict.fun = pred,
-  class = "classification"
-)
-
-# structure of predictor object
-str(predictor.gbm)
-
 # compute feature importance with specified loss metric
 imp.glm <- FeatureImp$new(predictor.glm, loss = "mse")
 imp.rf <- FeatureImp$new(predictor.rf, loss = "mse")
-imp.gbm <- FeatureImp$new(predictor.gbm, loss = "mse")
 
 # plot output
 p1 <- plot(imp.glm) + ggtitle("GLM")
 p2 <- plot(imp.rf) + ggtitle("RF")
-p3 <- plot(imp.gbm) + ggtitle("GBM")
 
-gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
+gridExtra::grid.arrange(p1, p2, nrow = 1)
 
 glm.ot <- Partial$new(predictor.glm, "influence_own_life") %>% plot() + ggtitle("GLM")
 rf.ot <- Partial$new(predictor.rf, "influence_own_life") %>% plot() + ggtitle("RF") 
-gbm.ot <- Partial$new(predictor.gbm, "influence_own_life") %>% plot() + ggtitle("GBM")
-
 
 # plot
-gridExtra::grid.arrange(interact.glm, interact.rf, interact.gbm, nrow = 1)
+gridExtra::grid.arrange(interact.glm, interact.rf, nrow = 1)
 
 # GLM model
 glm.age <- Partial$new(predictor.glm, "influence_own_life", ice = TRUE, grid.size = 50)
@@ -142,44 +123,48 @@ rf.age <- Partial$new(predictor.rf, "influence_own_life", ice = TRUE, grid.size 
 rf.age$center(min(features$influence_own_life))
 p2 <- plot(rf.age) + ggtitle("RF")
 
-# GBM model
-gbm.age <- Partial$new(predictor.gbm, "influence_own_life", ice = TRUE, grid.size = 50)
-gbm.age$center(min(features$influence_own_life))
-p3 <- plot(gbm.age) + ggtitle("GBM")
-
-gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
+gridExtra::grid.arrange(p1, p2, nrow = 1)
 
 p1 <- Partial$new(predictor.glm, c("influence_own_life", "jobs_since_last_interview")) %>% plot() + ggtitle("GLM") + ylim(c(0, .4))
 p2 <- Partial$new(predictor.rf, c("influence_own_life", "jobs_since_last_interview")) %>% plot() + ggtitle("RF") + ylim(c(0, .4))
-p3 <- Partial$new(predictor.gbm, c("influence_own_life", "jobs_since_last_interview")) %>% plot() + ggtitle("GBM") + ylim(c(0, .4))
 
-gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
+gridExtra::grid.arrange(p1, p2, nrow = 1)
 
 # identify variables with largest interactions in each model
 interact.glm <- Interaction$new(predictor.glm) %>% plot() + ggtitle("GLM")
 interact.rf  <- Interaction$new(predictor.rf) %>% plot() + ggtitle("RF")
-interact.gbm <- Interaction$new(predictor.gbm) %>% plot() + ggtitle("GBM")
 
 # plot
-gridExtra::grid.arrange(interact.glm, interact.rf, interact.gbm, nrow = 1)
+gridExtra::grid.arrange(interact.glm, interact.rf, nrow = 1)
 
 # identify variables with largest interactions
-interact.glm1 <- Interaction$new(predictor.glm, feature = "jobs_since_last_interview") %>% plot()
-interact.rf1  <- Interaction$new(predictor.rf, feature = "jobs_since_last_interview") %>% plot()
-interact.gbm1 <- Interaction$new(predictor.gbm, feature = "jobs_since_last_interview") %>% plot()
+interact.glm1 <- Interaction$new(predictor.glm, feature = "ethnicity") %>% plot()
+interact.rf1  <- Interaction$new(predictor.rf, feature = "ethnicity") %>% plot()
+
+interact.glm2 <- Interaction$new(predictor.glm, feature = "hourly_pay") %>% plot()
+interact.rf2  <- Interaction$new(predictor.rf, feature = "hourly_pay") %>% plot()
 
 # plot
-gridExtra::grid.arrange(interact.glm1, interact.rf1, interact.gbm1, nrow = 1)
+gridExtra::grid.arrange(interact.glm1, interact.rf1, nrow = 1)
+gridExtra::grid.arrange(interact.glm2, interact.rf2, nrow = 1)
 
-# fit surrogate decision tree model
-tree <- TreeSurrogate$new(predictor.gbm, maxdepth = 3)
+# GLM model ICE hourly_pay
+glm.age <- Partial$new(predictor.glm, "hourly_pay", ice = TRUE, grid.size = 50)
+glm.age$center(min(features$hourly_pay))
+p1 <- plot(glm.age) + ggtitle("GLM")
 
-# how well does this model fit the original results
-tree$r.squared
-## [1] 0.2029807
+# RF model ICE hourly_pay
+rf.age <- Partial$new(predictor.rf, "hourly_pay", ice = TRUE, grid.size = 50)
+rf.age$center(min(features$influence_own_life))
+p2 <- plot(rf.age) + ggtitle("RF")
 
-# 
-plot(tree)
+gridExtra::grid.arrange(p1, p2, nrow = 2)
+
+#plot interaction
+p11 <- Partial$new(predictor.glm, c("hourly_pay", "ethnicity")) %>% plot() + ggtitle("GLM")+
+theme(legend.position="bottom")
+p11
+
 
 # identify obs with highest and lowest probabilities
 (high <- predict(rf, splits$valid) %>% .[, 3] %>% as.vector() %>% which.max()) 
@@ -194,27 +179,8 @@ low_prob_ob  <- features[low, ]
 # fit local model
 lime.glm <- LocalModel$new(predictor.glm, k = 10, x.interest = high_prob_ob) %>% plot() + ggtitle("GLM")
 lime.rf  <- LocalModel$new(predictor.rf, k = 10, x.interest = high_prob_ob) %>% plot() + ggtitle("RF")
-lime.gbm <- LocalModel$new(predictor.gbm, k = 10, x.interest = high_prob_ob) %>% plot() + ggtitle("GBM")
 
-gridExtra::grid.arrange(lime.glm, lime.rf, lime.gbm, nrow = 1)
-
-# high probability observation
-predict(rf, splits$valid) %>% .[high, 3] # actual probability
-## [1] 1
-lime_high <- LocalModel$new(predictor.rf, k = 10, x.interest = high_prob_ob)
-lime_high$predict(high_prob_ob) # predicted probability
-##   prediction
-## 1  0.9356
-
-
-# low probability observation
-predict(rf, splits$valid) %>% .[low, 3] # actual probability
-## [1] 0.3766116
-lime_low <- LocalModel$new(predictor.rf, k = 10, x.interest = low_prob_ob)
-lime_low$predict(low_prob_ob) # predicted probability
-##   prediction
-## 1  0.8508104
-
+gridExtra::grid.arrange(lime.glm, lime.rf, nrow = 1)
 
 # compute Shapley values
 shapley.rf <- Shapley$new(predictor.rf, x.interest = high_prob_ob)
@@ -222,17 +188,13 @@ shapley.rf <- Shapley$new(predictor.rf, x.interest = high_prob_ob)
 # look at summary of results
 shapley.rf
 
-#plot results
-plot(shapley.rf)
-
 shapley.glm <- Shapley$new(predictor.glm, x.interest = high_prob_ob) %>% plot() + ggtitle("GLM")
 shapley.rf  <- plot(shapley.rf) + ggtitle("RF")
-shapley.gbm <- Shapley$new(predictor.gbm, x.interest = high_prob_ob) %>% plot() + ggtitle("GBM")
 
-gridExtra::grid.arrange(shapley.glm, shapley.rf, shapley.gbm, nrow = 1)
+gridExtra::grid.arrange(shapley.glm, shapley.rf, nrow = 1)
 
 shapley.glm <- Shapley$new(predictor.glm, x.interest = low_prob_ob) %>% plot() + ggtitle("GLM")
 shapley.rf  <- Shapley$new(predictor.rf, x.interest = low_prob_ob) %>% plot() + ggtitle("RF")
-shapley.gbm <- Shapley$new(predictor.gbm, x.interest = low_prob_ob) %>% plot() + ggtitle("GBM")
 
-gridExtra::grid.arrange(shapley.glm, shapley.rf, shapley.gbm, nrow = 1)
+
+gridExtra::grid.arrange(shapley.glm, shapley.rf, nrow = 1)
