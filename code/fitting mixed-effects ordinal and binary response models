@@ -1,0 +1,152 @@
+library(tidyverse)
+library(mixor)
+library(kableExtra)
+library(generalhoslem)
+library(rsq)
+library(lme4)
+
+set.seed(123)
+
+#subset relevant features
+baseline_data <- prepped_data_partial_center %>% 
+  dplyr::select(-union_or_employee_association,
+                -family_poverty_previous_year,
+                -union_or_contract,
+                -marital_status,
+                -drug_use,
+                -class_of_worker,
+                -reason_left,
+                -religion,
+                -ethnicity,
+                -gender,
+                -citizen_of_us,
+                -job_number,
+                -year,
+                -control_own_life,
+                -importance_of_planning,
+                -importance_of_luck,
+                -influence_own_life,
+                -rotter_score,
+                -jobs_reported,
+                -total_family_income_past_year,
+                -children_household,
+                -jobs_since_last_interview,
+                -self_esteem_score,
+                -weight,
+                -new_job,
+                -ces_depression,
+                -height_in_feet,
+                -height_in_inches,
+                -life_satisfaction,
+                -country_of_birth,
+                -job_level)
+
+#filter to align data with Riza et al.'s (2018)
+baseline_data <- baseline_data %>%  
+  filter(age_at_interview_date >=17) %>% 
+  dplyr::select(-age_at_interview_date)
+
+
+baseline_data <- drop_na(baseline_data)
+baseline_data <- drop_na(baseline_data)
+
+is.na(baseline_data) <- sapply(baseline_data, is.infinite)
+baseline_data <- drop_na(baseline_data)
+
+#mixor for final model
+model_partial <- mixor(job_satisfaction ~ 
+                union_or_employee_association+
+                family_poverty_previous_year+
+                union_or_contract+
+                marital_status+
+                drug_use+
+                class_of_worker+
+                reason_left+
+                religion+
+                ethnicity+
+                gender+
+                citizen_of_us+
+                job_number+
+                year+
+                control_own_life+
+                importance_of_planning+
+                importance_of_luck+
+                influence_own_life+
+                rotter_score+
+                jobs_reported+
+                total_family_income_past_year+
+                children_household+
+                jobs_since_last_interview+
+                self_esteem_score+
+                weight+
+                new_job+
+                ces_depression+
+                height_in_feet+
+                height_in_inches+
+                life_satisfaction+
+                hours_worked_week+
+                hourly_pay+
+                tenure+
+                country_of_birth+
+                job_level,
+                id = id,
+                link = "logit",
+                data = prepped_data_partial_center)
+
+
+#mixor for baseline model
+mixor_baseline_partial <- mixor(job_satisfaction ~ 
+                          hourly_pay+
+                          tenure,
+                        id = id,
+                        link = "logit",
+                        data = baseline_data)
+
+
+
+#creating model results mixor final model
+model_partial_final <- as.data.frame(model_partial[4]) %>% 
+  format(scientific = F) %>% 
+  rownames_to_column() %>% 
+  rename(replace = c("Variable" = "rowname")) %>% 
+  mutate(Estimate = as.numeric(Model.Estimate),
+         StdError = as.numeric(Model.Std..Error),
+         Pvalue = as.numeric(Model.P...z..),
+         Significant = case_when(Pvalue <= 0.1 & Pvalue > 0.05 ~ "*", 
+                                 Pvalue <= 0.05 & Pvalue > 0.01 ~ "**", 
+                                 Pvalue <= 0.01 ~ "***",
+                                 TRUE ~ " ")) %>% 
+  mutate_if(is.numeric, round, digits = 2) %>% 
+  dplyr::select(-Model.Estimate, -Model.Std..Error, -Model.z.value, -Model.P...z..)
+
+#creating model results mixor baseline model
+model_partial_baseline <- as.data.frame(mixor_baseline_partial[4]) %>% 
+  format(scientific = F) %>% 
+  rownames_to_column() %>% 
+  rename(replace = c("Variable" = "rowname")) %>% 
+  mutate(Estimate = as.numeric(Model.Estimate),
+         StdError = as.numeric(Model.Std..Error),
+         Pvalue = as.numeric(Model.P...z..),
+         Significant = case_when(Pvalue <= 0.1 & Pvalue > 0.05 ~ "*", 
+                                 Pvalue <= 0.05 & Pvalue > 0.01 ~ "**", 
+                                 Pvalue <= 0.01 ~ "***",
+                                 TRUE ~ " ")) %>% 
+  mutate_if(is.numeric, round, digits = 2) %>% 
+  dplyr::select(-Model.Estimate, -Model.Std..Error, -Model.z.value, -Model.P...z..)
+
+## creating table
+final_table <- model_partial_final %>%
+  kable("html", caption = "Mixed-Effects Longitudinal Model of Job Satisfaction") %>% 
+  kable_styling(font_size=8) %>% 
+  footnote(general = "* = 0.1, ** = 0.05, *** = 0.01", )
+
+final_table
+
+final_table_baseline <- model_partial_baseline %>%
+  kable("latex", caption = "Mixed-Effects Longitudinal Model of Job Satisfaction") %>% 
+  kable_styling(font_size=8) %>% 
+  footnote(general = "* = 0.1, ** = 0.05, *** = 0.01", )
+
+final_table_baseline
+
+
