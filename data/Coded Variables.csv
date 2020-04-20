@@ -1,0 +1,86 @@
+﻿Variables of the U.S. Burea of Labor Statistics Used for the Final Model,,,,,
+Variable Name,Coding,,,,
+Age,numerically in years,,,,
+ID,in arabic numbers,,,,
+born_in_us,"(1) yes 
+(2) no",,,,
+religion,"0 no religion
+1 protestan (christian)
+2 baptist (christian)
+3 episcopalian (christian)
+4 lutheran (christian)
+5 methodist (christian)
+6 presbyterian (christian)
+7 catholic
+8 jewish
+9 other",,,,
+sample race / ethnicity,"(1) hispanic 
+(2) black 
+(3) non-hispanic or black",,,,
+gender,"(1) male 
+(2) female",,,,
+us_citizen,"(1) yes 
+(2) no",,,,
+job_number,numerically,,,,
+year,numerically in calendar years,,,,
+job_satisfaction,"(1) like it very much
+(2) like it fairly well
+(3) dislike it somewhat
+(4) dislike it very much",,,,
+control_life,"(1) yes 
+(2) no",,,,
+importance_planning,"(1) high importance 
+(2) little importance",,,,
+importance_luck,"(1) no importance 
+(2) high importance",,,,
+influence_life,"(1) no 
+(2) yes",,,,
+rotter_score,"(1) internal locus of control
+to
+(29) external locus of control",,,,
+jobs_reported,numerically,,,,
+age,numerically in years,,,,
+total_family_income,numerically in $,,,,
+children,numerically,,,,
+jobs_since_last_interview,numerically,,,,
+self_esteem_score,numerically,,,,
+weight,numerically in pounds,,,,
+depression,"(0) none
+(1) some
+(2) occasionally
+(3) all of the time",,,,
+height,numerically in feet,,,,
+life_satisfaction,"(1) not at all satisfied 
+to
+(7) completely satisfied",,,,
+hours_worked_week,numerically in hours,,,,
+pay,numerically in $,,,,
+tenure,numerically in weeks,,,,
+union or association,"(1) yes 
+(2) no",,,,
+family_poverty,numerically,,,,
+union_or_contract,"(1) yes 
+(0) no",,,,
+new_job_before_left,"(1) yes 
+(0) no",,,,
+marital_status,"(0) never married
+(1) married
+(2) separated
+(3) divorced
+(5) remarried
+(6) widowed",,,,
+drug_use,numerically ,,,,
+class_of_worker,"(1) private company
+(2) government
+(3) self-employed
+(4) without pay",,,,
+reason_left,"(1) layoff
+(2) fired
+(3) programme ended
+(4) better job
+(5) quit
+(6) little money
+(7) illness",,,,
+job_government,"(1) federal
+(2) state
+(3) local",,,,
