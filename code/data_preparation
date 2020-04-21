@@ -241,7 +241,7 @@ dplyr::mutate(tenure = ifelse(is.na(tenure),
 
 require(mice)
 set.seed(123)
-data_binary <- job_satisfaction_data %>% dplyr::select(id, union_or_employee_association, family_poverty_previous_year, covered_union_or_employee_contract, new_job_lined_up_before_left)
+data_binary <- job_satisfaction_data %>% dplyr::select(id, union_or_association, family_poverty, union_or_contract, new_job_before_left)
 imputed_binary <- mice(data_binary, method = "logreg")
 data_binary <- mice::complete(imputed_binary)
 
